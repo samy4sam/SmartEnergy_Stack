@@ -20,13 +20,6 @@ services:
       - DOCKER_INFLUXDB_INIT_MODE=${DOCKER_INFLUXDB_INIT_MODE}
       - INFLUXDB_HTTP_FLUX_ENABLED='true'
       - INFLUXDB_HTTP_AUTH_ENABLED='true'
-  grafana-image-renderer:
-    container_name: grafana-image-renderer
-    image: grafana/grafana-image-renderer:latest
-    ports:
-    - 8081
-    networks:
-    - iot_net
   grafana:
     container_name: grafana
     image: grafana/grafana
@@ -35,43 +28,16 @@ services:
     networks:
     - iot_net
     environment:
-      - GF_RENDERING_SERVER_URL=grafana-image-renderer:8081/render
-      - GF_RENDERING_CALLBACK_URL=grafana:3000
-      - GF_LOG_FILTERS= rendering:debug
       - GF_SECURITY_ADMIN_USER=${GF_SECURITY_ADMIN_USER}
       - GF_SECURITY_ADMIN_PASSWORD=${GF_SECURITY_ADMIN_PASSWORD}
     volumes:
       - grafana-storage:/var/lib/grafana
       - grafana-config:/etc/grafana
-  node-red:
-    container_name: Node-Red
-    image: nodered/node-red:latest
-    command:
-      - "--settings"
-      - "/settings/settings.js"
-    environment:
-      - TZ=Europe/Zurich
-      - INFLUX_ENDPOINT=${INFLUX_ENDPOINT}
-      - NODE_RED_ADMIN_PW=${NODE_RED_ADMIN_PW}
-      - DOCKER_INFLUXDB_INIT_USERNAME=admin
-      - DOCKER_INFLUXDB_INIT_PASSWORD=${DOCKER_INFLUXDB_INIT_PASSWORD}
-      - DOCKER_INFLUXDB_INIT_ORG=${DOCKER_INFLUXDB_INIT_ORG}
-      - DOCKER_INFLUXDB_INIT_BUCKET=${DOCKER_INFLUXDB_INIT_BUCKET}
-      - DOCKER_INFLUXDB_INIT_ADMIN_TOKEN=${DOCKER_INFLUXDB_INIT_ADMIN_TOKEN}
-      - DOCKER_INFLUXDB_INIT_MODE=${DOCKER_INFLUXDB_INIT_MODE}
-    ports:
-      - "1880:1880"
-    networks:
-      - iot_net
-    volumes:
-      - nodered_volume:/data
-      - ./nodered/settings:/settings
   telegraf:
     image: telegraf
     links:
       - influxdb
     volumes:
-      # Mount for telegraf config
       - ./telegraf/mytelegraf.conf:/etc/telegraf/telegraf.conf
     environment: 
       - DOCKER_INFLUXDB_INIT_ORG=${DOCKER_INFLUXDB_INIT_ORG}
@@ -80,7 +46,6 @@ services:
     networks:
       - iot_net
 volumes:
-  nodered_volume:
   influxdb-data:
   influxdb-config:
   grafana-storage:
