@@ -1,1 +1,1 @@
-# IoT_Docker_Stack
+# SmartEnergy_Stack
